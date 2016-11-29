@@ -1,0 +1,46 @@
+---
+- name: acquire current bridge mappings
+  command: sed -n "/^bridge_mappings.*=.*/p" /etc/neutron/plugins/ml2/openvswitch_agent.ini 
+  register: bridge_mappings
+
+- name: acquire current flat networks
+  command: sed -n "/^flat_networks.*=.*/p" /etc/neutron/plugin.ini
+  register: flat_networks
+  when: ({{ vlan_tag }} == 0)
+
+- name: acquire current vlan networks
+  command: sed -n "/^network_vlan_ranges.*=.*/p" /etc/neutron/plugin.ini
+  register: vlan_networks
+  when: ({{ vlan_tag }} != 0)
+
+- name: ensure bridge mappings includes network, check 1
+  command: sed -ri "s/^bridge_mappings.*=.*/&,{{ network_name }}:br-{{ network_name }}/" /etc/neutron/plugins/ml2/openvswitch_agent.ini
+  when: (bridge_mappings.stdout != '' and '{{ network_name }}:br-{{ network_name }}' not in bridge_mappings.stdout)
+
+- name: ensure bridge mappings includes network, check 2
+  lineinfile: regexp='' line='bridge_mappings = {{ network_name }}:br-{{ network_name }}' dest=/etc/neutron/plugins/ml2/openvswitch_agent.ini
+  register: bridge_mappings_conf
+  when: (bridge_mappings.stdout == '')
+
+- name: ensure flat networks includes network (if necessary), check 1
+  command: sed -ri "s/^flat_networks.*=.*/&,{{ network_name }}/" /etc/neutron/plugin.ini
+  when: ({{ vlan_tag }} == 0 and flat_networks.stdout != '' and '{{ network_name }}' not in flat_networks.stdout)
+
+- name: ensure flat networks includes network (if necessary), check 2
+  lineinfile: regexp='' line='flat_networks = {{ network_name }}' dest=/etc/neutron/plugin.ini
+  register: plugin_conf
+  when: ({{ vlan_tag }} == 0 and flat_networks.stdout == '')
+
+- name: ensure vlan networks includes network (if necessary), check 1
+  command: sed -ri "s/^network_vlan_ranges.*=.*/&,{{ network_name }}:1:1000/" /etc/neutron/plugin.ini
+  when: ({{ vlan_tag }} != 0 and vlan_networks.stdout != '' and '{{ network_name }}' not in vlan_networks.stdout)
+
+- name: ensure vlan networks includes network (if necessary), check 2
+  lineinfile: regexp='' line='network_vlan_ranges = {{ network_name }}:1:1000' dest=/etc/neutron/plugin.ini
+  register: plugin_conf2
+  when: ({{ vlan_tag }} != 0 and vlan_networks.stdout == '')
+
+- name: restart neutron services (if necessary)
+  shell: >
+    for i in $(systemctl | grep neutron | awk {'print $1'});
+    do systemctl restart $i; done

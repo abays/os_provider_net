@@ -1,0 +1,4 @@
+---
+- include: ../../neutron-agent/tasks/config_agents.yml
+- include: ../../ovs-bridge/tasks/main.yml
+- include: ../../neutron-agent/tasks/config_agents2.yml

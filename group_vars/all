@@ -1,0 +1,7 @@
+---
+skip_network_create: false
+network_name: provider
+network_ip: 10.0.20.0
+network_ip_start: 10.0.20.10
+network_ip_end: 10.0.20.200
+vlan_tag: 0                 # non-zero = use vlan, and use this id

@@ -1,0 +1,30 @@
+---
+- name: get controller nodes
+  shell: >
+    source /home/stack/stackrc;
+    nova list | grep -v ID | grep control | awk '{print $12}' | cut -d '=' -f 2
+  register: controller_list|array
+
+- name: get compute nodes
+  shell: >
+    source /home/stack/stackrc;
+    nova list | grep -v ID | grep compute | awk '{print $12}' | cut -d '=' -f 2
+  register: compute_list|array
+
+- name: add controller nodes to controller host group
+  add_host:
+    name: {{ item.stdout_lines[0] }}
+    groups: controller
+    ansible_host: {{ item.stdout_lines[] }}
+    ansible_user: heat-admin
+    ansible_become: true
+  with_items: controller_list
+
+- name: add compute nodes to compute host group
+  add_host:
+    name: {{ item.stdout_lines[0] }}
+    groups: compute
+    ansible_host: {{ item.stdout_lines[] }}
+    ansible_user: heat-admin
+    ansible_become: true
+  with_items: compute_list

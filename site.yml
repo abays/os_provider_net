@@ -1,0 +1,43 @@
+---
+
+- name: setup host server
+  hosts: server
+  remote_user: root
+
+  roles:
+    - server
+
+- name: get overcloud nodes
+  hosts: undercloud
+  remote_user: root
+
+  roles:
+    - node-list
+
+- name: configure controllers
+  hosts: controller
+  remote_user: root
+
+  roles:
+    - controller
+
+- name: configure computes
+  hosts: compute
+  remote_user: root
+
+  roles:
+    - compute
+
+- name: configure neutron networks
+  hosts: controller[0]
+  remote_user: root
+
+  roles:
+    - overcloud-networks
+
+#- name: configure undercloud
+#  hosts: undercloud
+#  remote_user: root
+#
+#  roles:
+#    - undercloud-networks

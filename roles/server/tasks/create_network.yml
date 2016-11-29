@@ -1,0 +1,18 @@
+---
+- name: create network definition
+  template: src=network.xml.j2 dest=/root/{{ network_name }}.xml
+
+- name: import network definition
+  command: virsh net-define /root/{{ network_name }}.xml
+
+- name: start network
+  command: virsh net-start {{ network_name }}
+
+- name: set network to auto-start
+  command: virsh net-autostart {{ network_name }}
+
+- name: attach an interface to the network for each target vm
+  shell: >
+    for i in $(virsh list --all | grep 'undercloud\|overcloud' | awk  '{print $2}');
+    do virsh attach-interface --domain $i --type network --source {{ network_name }}
+    --model virtio --config live; done

@@ -1,0 +1,14 @@
+---
+- name: create flat neutron network (if requested)
+  shell: >
+    source /home/stack/stackrc;
+    neutron net-create {{ network_name }} --shared --provider:physical_network {{ network_name }} --provider:network_type flat;
+    neutron subnet-create --name {{ network_name }}_subnet --no-gateway --allocation-pool start={{ network_ip_start }},end={{ network_ip_end }} --enable-dhcp subscriber {{ network_ip }}/24
+  when: ({{ vlan_tag }} == 0)
+
+- name: create vlan neutron network (if requested)
+  shell: >
+    source /home/stack/stackrc;
+    neutron net-create {{ network_name }} --shared --provider:physical_network {{ network_name }} --provider:network_type vlan --provider:segmentation_id {{ vlan_tag }};
+    neutron subnet-create --name {{ network_name }}_subnet --no-gateway --allocation-pool start={{ network_ip_start }},end={{ network_ip_end }} --enable-dhcp subscriber {{ network_ip }}/24
+  when: ({{ vlan_tag }} != 0)

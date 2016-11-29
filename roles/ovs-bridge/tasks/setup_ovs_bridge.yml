@@ -1,0 +1,6 @@
+---
+- name: add bridge
+  command: ovs-vsctl add-br br-{{ network_name }}
+
+- name: add port to bridge
+  command: ovs-vsctl add-port br-{{ network_name }} {{ }}
