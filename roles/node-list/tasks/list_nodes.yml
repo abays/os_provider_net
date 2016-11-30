@@ -15,7 +15,7 @@
   add_host:
     name: {{ item.stdout_lines[0] }}
     groups: controller
-    ansible_host: {{ item.stdout_lines[] }}
+    ansible_host: {{ item.stdout_lines[0] }}
     ansible_user: heat-admin
     ansible_become: true
   with_items: controller_list
@@ -24,7 +24,7 @@
   add_host:
     name: {{ item.stdout_lines[0] }}
     groups: compute
-    ansible_host: {{ item.stdout_lines[] }}
+    ansible_host: {{ item.stdout_lines[0] }}
     ansible_user: heat-admin
     ansible_become: true
   with_items: compute_list
