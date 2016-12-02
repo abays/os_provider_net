@@ -1,3 +1,3 @@
 ---
 - include: ../../ovs-bridge/tasks/main.yml
-- include: ../../neutron-agent/config_agents2.yml
+- include: ../../neutron-agent/tasks/config_agents2.yml

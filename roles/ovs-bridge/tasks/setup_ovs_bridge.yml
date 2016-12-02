@@ -1,6 +1,10 @@
 ---
 - name: add bridge
   command: ovs-vsctl add-br br-{{ network_name }}
+  register: add_br
+  failed_when: (add_br.stderr != '' and 'already exists' not in add_br.stderr)
 
 - name: add port to bridge
-  command: ovs-vsctl add-port br-{{ network_name }} {{ }}
+  command: ovs-vsctl add-port br-{{ network_name }} {{ if_name }}
+  register: add_port
+  failed_when: (add_port.stderr != '' and 'already exists' not in add_port.stderr)

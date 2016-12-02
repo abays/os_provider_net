@@ -1,18 +1,28 @@
 ---
 - name: create network definition
-  template: src=network.xml.j2 dest=/root/{{ network_name }}.xml
+  local_action: template src=network.xml.j2 dest=/root/{{ network_name }}.xml
+  when: ({{ skip_network_create }} == false) 
 
 - name: import network definition
-  command: virsh net-define /root/{{ network_name }}.xml
+  local_action: command virsh net-define /root/{{ network_name }}.xml
+  when: ({{ skip_network_create }} == false)
 
 - name: start network
-  command: virsh net-start {{ network_name }}
+  local_action: command virsh net-start {{ network_name }}
+  when: ({{ skip_network_create }} == false)
 
 - name: set network to auto-start
-  command: virsh net-autostart {{ network_name }}
+  local_action: command virsh net-autostart {{ network_name }}
+  when: ({{ skip_network_create }} == false)
+
+- name: get all undercloud and overcloud vms
+  local_action: shell for i in $(virsh list --all | grep 'undercloud\|overcloud' | awk  '{print $2}'); do echo $i; done
+  register: cloud_vms
+
+- name: DEBUG
+  debug: var=cloud_vms
 
 - name: attach an interface to the network for each target vm
-  shell: >
-    for i in $(virsh list --all | grep 'undercloud\|overcloud' | awk  '{print $2}');
-    do virsh attach-interface --domain $i --type network --source {{ network_name }}
-    --model virtio --config live; done
+  local_action: command virsh attach-interface --domain {{ item }} --type network --source {{ network_name }} --model virtio --config live
+  when: (({{ skip_network_create }} == false and {{ skip_vm_if_attach }} == false) or ({{ skip_network_create }} == true and {{ skip_vm_if_attach }} == false))
+  with_items: "{{ cloud_vms.stdout_lines }}"

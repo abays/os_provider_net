@@ -1,7 +1,7 @@
 ---
 
-- name: setup host server
-  hosts: server
+- name: create base networks
+  hosts: undercloud
   remote_user: root
 
   roles:
@@ -16,7 +16,7 @@
 
 - name: configure controllers
   hosts: controller
-  remote_user: root
+  remote_user: root 
 
   roles:
     - controller
@@ -34,10 +34,3 @@
 
   roles:
     - overcloud-networks
-
-#- name: configure undercloud
-#  hosts: undercloud
-#  remote_user: root
-#
-#  roles:
-#    - undercloud-networks

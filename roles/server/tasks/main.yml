@@ -1,3 +1,2 @@
 ---
 - include: create_network.yml
-  when: ({{ skip_network_create }} == false)

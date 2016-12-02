@@ -1,2 +1,4 @@
 ---
 if_name: eth2
+#undercloud_ip: "{{ hostvars[groups['undercloud'][0]]['ansible_default_ipv4']['address'] }}"
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

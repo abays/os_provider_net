@@ -3,28 +3,35 @@
   shell: >
     source /home/stack/stackrc;
     nova list | grep -v ID | grep control | awk '{print $12}' | cut -d '=' -f 2
-  register: controller_list|array
+  register: controller_list
 
 - name: get compute nodes
   shell: >
     source /home/stack/stackrc;
     nova list | grep -v ID | grep compute | awk '{print $12}' | cut -d '=' -f 2
-  register: compute_list|array
+  register: compute_list
+
+- name: DEBUG
+  debug: var=controller_list
 
 - name: add controller nodes to controller host group
   add_host:
-    name: {{ item.stdout_lines[0] }}
+    name: "{{ item }}"
     groups: controller
-    ansible_host: {{ item.stdout_lines[0] }}
-    ansible_user: heat-admin
-    ansible_become: true
-  with_items: controller_list
+    ansible_host: "{{ item }}"
+    ansible_user: root
+    ansible_ssh_pass: "{{ overcloud_root_pw }}" 
+    #ansible_become: true
+    #ansible_become_user: stack
+  with_items: "{{ controller_list.stdout_lines }}"
 
 - name: add compute nodes to compute host group
   add_host:
-    name: {{ item.stdout_lines[0] }}
+    name: "{{ item }}"
     groups: compute
-    ansible_host: {{ item.stdout_lines[0] }}
-    ansible_user: heat-admin
-    ansible_become: true
-  with_items: compute_list
+    ansible_host: "{{ item }}"
+    ansible_user: root
+    ansible_ssh_pass: "{{ overcloud_root_pw }}"
+    #ansible_become: true
+    #ansible_become_user: stack
+  with_items: "{{ compute_list.stdout_lines }}"

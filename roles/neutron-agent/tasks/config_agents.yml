@@ -1,6 +1,6 @@
 ---
 - name: remove external bridge from l3 agent conf
-  lineinile: dest=/etc/neutron/l3_agent.ini regexp=^\s*external_network_bridge\s*= line=#external_network_bridge=
+  lineinfile: dest=/etc/neutron/l3_agent.ini regexp=^\s*external_network_bridge\s*= line=#external_network_bridge=
 
 - name: enable isolated metadata for dhcp agent
   lineinfile: dest=/etc/neutron/dhcp_agent.ini regexp=^\s*enable_isolated_metadata\s*= line=enable_isolated_metadata=True
